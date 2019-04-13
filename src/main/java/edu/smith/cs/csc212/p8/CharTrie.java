@@ -123,6 +123,12 @@ public class CharTrie extends AbstractSet<String> {
 			// loop over links
 			// if they're not null
 			// count them, too
+			for(int i=0;i<links.length;i++) {
+				if(links[i]!=null) {
+					count++;
+					count+=links[i].countNodes();
+				}
+			}
 			return count;
 		}
 	}

@@ -95,7 +95,13 @@ public class LLHash extends AbstractSet<String> {
 	 * @return the number of buckets with more than one value.
 	 */
 	public int countCollisions() {
-		return 0;
+		int countOfCollisions = 0;
+		for(Bucket b: this.buckets) {
+			if(b.values.size() > 1) {
+				countOfCollisions += 1;
+			}
+		}
+		return countOfCollisions;
 	}
 
 	/**
@@ -104,6 +110,11 @@ public class LLHash extends AbstractSet<String> {
 	 */
 	public int countUsedBuckets() {
 		int count = 0;
+		for(Bucket b:this.buckets) {
+			if(b.values.size()!=0) {
+				count+=1;
+			}
+		}
 		return count;
 	}
 	

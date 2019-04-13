@@ -30,6 +30,39 @@ public class CheckSpelling {
 		return words;
 	}
 	
+	public static List<String> loadBook() {
+		long start = System.nanoTime();
+		List<String> wordsList;
+		String bookAsString = new String();
+		try {	
+			// Read from a file:
+			wordsList = Files.readAllLines(new File("src/main/resources/dracula.txt").toPath());
+		} catch (IOException e) {
+			throw new RuntimeException("Couldn't find book.", e);
+		}
+		
+		for (String w : wordsList) {
+			bookAsString = bookAsString + w + " ";
+		}
+		long end = System.nanoTime();
+		double time = (end - start) / 1e9;
+		System.out.println("Loaded " + wordsList.size() + " entries of the book in " + time +" seconds.");
+		return WordSplitter.splitTextToWords(bookAsString);
+	}
+	
+	
+	public static List<String> misspelled(List<String> toTest, Collection<String> dictionary) {
+		List<String> misspelledWords = new ArrayList<>();
+		for(String w : toTest) {
+			if(dictionary.contains(w)) {
+				continue;
+			} else {
+				misspelledWords.add(w);
+			}
+		}
+		return misspelledWords;
+	} 
+	
 	/**
 	 * This method looks for all the words in a dictionary.
 	 * @param words - the "queries"
@@ -49,13 +82,25 @@ public class CheckSpelling {
 		double fractionFound = found / (double) words.size();
 		double timeSpentPerItem = (endLookup - startLookup) / ((double) words.size());
 		int nsPerItem = (int) timeSpentPerItem;
-		System.out.println(dictionary.getClass().getSimpleName()+": Lookup of items found="+fractionFound+" time="+nsPerItem+" ns/item");
+		System.out.println(dictionary.getClass().getSimpleName()+": Lookup of items found = "+fractionFound+" time = "+nsPerItem+" ns/item");
 	}
 	
 	public static List<String> createMixedDataset(List<String> yesWords, int numSamples, double fractionYes) {
 		// Hint to the ArrayList that it will need to grow to numSamples size:
 		List<String> output = new ArrayList<>(numSamples);
-		// TODO: select numSamples * fractionYes words from yesWords; create the rest as no words.
+		// todo: select numSamples * fractionYes words from yesWords; create the rest as no words.
+		int hitsRequired = (int) (numSamples * fractionYes);
+		// counter to distinguish whether you have add the required number of yes words in output yet or not.
+		int counter = 0; 
+		while(counter < numSamples) {
+			if (counter < hitsRequired) {
+				output.add(yesWords.get(counter));
+				counter++;
+			} else {
+				output.add(yesWords.get(counter) + "xyzz");
+				counter++;
+			}
+		}
 		return output;
 	}
 	
@@ -84,17 +129,19 @@ public class CheckSpelling {
 		timeLookup(listOfWords, trie);
 		timeLookup(listOfWords, hm100k);
 		
-		
-		for (int i=0; i<10; i++) {
+		System.out.println();
+		for (int i=0; i<11; i++) {
 			// --- Create a dataset of mixed hits and misses with p=i/10.0
 			List<String> hitsAndMisses = createMixedDataset(listOfWords, 10_000, i/10.0);
 			
+			System.out.println("For i = "+i+"; in other words the lookup time for words in the dictionary if " +(i*10)+ "% of them are correct" );
 			// --- Time the data structures.
 			timeLookup(hitsAndMisses, treeOfWords);
 			timeLookup(hitsAndMisses, hashOfWords);
 			timeLookup(hitsAndMisses, bsl);
 			timeLookup(hitsAndMisses, trie);
 			timeLookup(hitsAndMisses, hm100k);
+			System.out.println("\n");
 		}
 			
 
@@ -117,6 +164,29 @@ public class CheckSpelling {
 
 		
 		System.out.println("log_2 of listOfWords.size(): "+listOfWords.size());
+		
+		
+		System.out.println("\n");
+		System.out.println("-------------- Dracula by Bram Stoker ----------------");
+		List<String> book = loadBook();
+		timeLookup(book,treeOfWords);
+		timeLookup(book, hashOfWords);
+		timeLookup(book, bsl);
+		timeLookup(book, trie);
+		timeLookup(book, hm100k);
+	
+		
+		double ratioMisspelled = (double) misspelled(book, hashOfWords).size()/ (double) book.size();
+		System.out.println("The number of mis-spelled words is: " + misspelled(book, hashOfWords).size());
+		System.out.println("The number of total words in the book is: " + book.size());
+		System.out.println("Example of some Mispelled words: ");
+		for(int i = 0; i < 11; i++) {
+			System.out.println("\n\t["+i+"] "+misspelled(book,hashOfWords).get(i));
+		}
+		
+		System.out.println("\nThe ratio of mispelled words in the book is: " + ratioMisspelled);
+		System.out.println("-------------------------------------");
+		
 		
 		System.out.println("Done!");
 	}
