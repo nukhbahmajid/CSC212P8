@@ -117,7 +117,7 @@ public class CheckSpelling {
 		for (String w : listOfWords) {
 			trie.insert(w);
 		}
-		LLHash hm100k = new LLHash(100000);
+		LLHash hm100k = new LLHash(500000);
 		for (String w : listOfWords) {
 			hm100k.add(w);
 		}

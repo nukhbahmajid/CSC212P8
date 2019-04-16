@@ -136,7 +136,7 @@ public class SpeedCheck {
 				+"\n\tHashSet: "+insertHashSetTime/1000+"μs"
 				+"\n\tTreeSet: "+insertTreeSetTime/1000+"μs"
 				+"\n\tCharTrie: "+insertCharTrieTime/1000+"μs"
-				+"\n\tLLHash: "+insertLLHashTime/1000+"μ2"
+				+"\n\tLLHash: "+insertLLHashTime/1000+"μs"
 				+"\n\tSortedStringListSet: "+insertSSLSTime/1000+"μs");
 		System.out.println("\n---------------------------------------------------------------------------\n");
 		
